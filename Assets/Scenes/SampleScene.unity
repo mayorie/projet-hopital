@@ -352,7 +352,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::c_collision
   collisionprogress: 0
-  maxprogress: 100
+  timeobjectiveinsec: 1.5
   HealthBar: {fileID: 2034077528}
   gameObjectName: {fileID: 1065831685}
 --- !u!224 &318783685 stripped

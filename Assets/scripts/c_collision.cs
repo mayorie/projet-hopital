@@ -5,9 +5,9 @@ using UnityEngine;
 
 public class c_collision : MonoBehaviour
 {
-    public int collisionprogress = 0;
+    public float collisionprogress = 0;
     private bool isColliding = false;
-    public int maxprogress = 100;
+    public float timeobjectiveinsec = 1.5f;
 
     [SerializeField] FloatingHealthBar HealthBar;
     [SerializeField] GameObject gameObjectName;
@@ -23,7 +23,7 @@ public class c_collision : MonoBehaviour
     {
         Debug.Log("Script c_collision démarré sur " + gameObject.name);
         StartCoroutine(CollisionProgressRoutine());
-        HealthBar.UpdateHealthBar(collisionprogress, maxprogress);
+        HealthBar.UpdateHealthBar(collisionprogress, timeobjectiveinsec);
     }
 
     void Update()
@@ -62,27 +62,27 @@ public class c_collision : MonoBehaviour
     {
         while (true)
         {
-            if (isColliding && collisionprogress < 100)
+            if (isColliding && collisionprogress < timeobjectiveinsec)
             {
-                collisionprogress++;
+                collisionprogress += 0.1f;
                 Debug.Log("Progression de la collision : " + collisionprogress + "%");
-                HealthBar.UpdateHealthBar(collisionprogress, maxprogress);
-                if (collisionprogress == 100)
+                HealthBar.UpdateHealthBar(collisionprogress, timeobjectiveinsec);
+                if (collisionprogress == timeobjectiveinsec)
                 {
-                    Debug.Log("Signal : collisionprogress atteint 100 !");
+                    Debug.Log("Signal : collisionprogress atteint " + timeobjectiveinsec + " !");
                     OnCollisionProgressMax?.Invoke();
                 }
-                yield return new WaitForSeconds(0.25f);
+                yield return new WaitForSeconds(0.1f);
             }
             else if (!isColliding && collisionprogress > 0)
             {
                 yield return new WaitForSeconds(1f);
                 while (!isColliding && collisionprogress > 0)
                 {
-                    collisionprogress--;
+                    collisionprogress -= 0.1f;
                     Debug.Log("Régression de la collision : " + collisionprogress + "%");
-                    yield return new WaitForSeconds(0.25f);
-                    HealthBar.UpdateHealthBar(collisionprogress, maxprogress);
+                    yield return new WaitForSeconds(0.1f);
+                    HealthBar.UpdateHealthBar(collisionprogress, timeobjectiveinsec);
                 }
             }
             else
