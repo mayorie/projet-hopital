@@ -10,7 +10,7 @@ public class choose_target_items : MonoBehaviour
     private GameObject player;  // on attache ce sript à lobjet joueur, pou pouvoir calculer des distances entre le joueur et les objets de la scène.
 
     [Tooltip("L'objet en cours avec lequel on doit interagir.")]
-    [SerializeField] private GameObject targetItem;
+    public GameObject targetItem;
 
     [Tooltip("Le numéro de difficulté visé. 1-3: regarder. 4-6: pointer. 7-9: prendre")] 
     [SerializeField] private int targetDifficulty;
@@ -18,8 +18,14 @@ public class choose_target_items : MonoBehaviour
 
     // les valeurs suivantes sont sujettes à changement pour équilibrage.
     // Elles permettentent de convertir les distances en numéro de difficulté.
-
+    [Tooltip("A partir de cette distance, on ne peut pas attrapper un objet.")]
     public float grab_distance_cap = 1.5f; // la distance maximale à laquelle le joueur peut prendre un objet.
+
+    [Tooltip("En dessous de cette taille, un objet est difficile à remarquer, et la difficulté augmente.")]
+    public float size_difficulty_cap = 0.3f ; // la taille maximale d'un objet pour qu'il soit considéré comme difficile à voir ou à pointer.
+
+    [Tooltip("Au delà de cette distance, un objet est difficile à voir, et la difficulté augmente.")]
+    public float distance_difficulty_cap = 5f; // la distance maximale à laquelle un objet peut être pour être considéré comme difficile à voir ou à pointer.
 
 
     public void set_target_diffiulty(int difficulty)
@@ -38,39 +44,61 @@ public class choose_target_items : MonoBehaviour
 
         foreach (GameObject item in interactableItems)
         {
-            float distance = Vector3.Distance(player.transform.position, item.transform.position);
-
-            if (targetDifficulty <= 3)  // Si on doit juste regarder l'objet
+            // Si la difficulté d'interaction avec cet objet correspond à la difficulté visée, on l'ajoute à la liste des objets ciblables.
+            if (determine_difficulty(targetDifficulty, item) == targetDifficulty)
             {
-                // On pourra ajouter d'autres conditions de sélection plus tard, pour affiner la précision des difficultés.
-                if (distance <= grab_distance_cap * 2)  // on peut regarder un objet à une distance plus grande que celle à laquelle on peut le prendre.
-                { 
-                    // on ajoute l'objet à la liste des objets cibles.
-                    targetableItems.Add(item);
-                }
+                targetableItems.Add(item);
             }
-
-            else if (targetDifficulty <= 6)  // Si on doit pointer l'objet
-                {
-                // On pourra ajouter d'autres conditions de sélection plus tard, pour affiner la précision des difficultés.
-                if (distance <= grab_distance_cap * 1.5f)  // on peut pointer un objet à une distance plus grande que celle à laquelle on peut le prendre, mais plus petite que celle à laquelle on peut le regarder.
-                { 
-                    // on ajoute l'objet à la liste des objets cibles.
-                    targetableItems.Add(item);
-                }
-            }
-
-            else if (targetDifficulty <= 9)  // Si on doit attrapper l'objet
-            {
-                // On pourra ajouter d'autres conditions de sélection plus tard, pour affiner la précision des difficultés.
-                if (distance <= grab_distance_cap)
-                { 
-                    // on ajoute l'objet à la liste des objets cibles.
-                    targetableItems.Add(item);
-                } 
-            }
-
-
         }
+
+        // Si on a trouvé au moins un objet qui correspond à la difficulté visée, on en choisit un au hasard parmi ceux-là.
+        if (targetableItems.Count > 0)
+        {
+            int randomIndex = Random.Range(0, targetableItems.Count);
+            targetItem = targetableItems[randomIndex];
+        }
+         else
+        {
+            Debug.Log("Aucun objet ne correspond à la difficulté visée.");
+            Debug.Log("On change la difficulté visée pour trouver un objet.");
+
+            // On doit changer la difficulté, mais pas changer de mode de jeu.
+            if (targetDifficulty % 3 == 1) targetDifficulty += 2;
+            else targetDifficulty--;
+
+            // puis on relance la fonction de recherche.
+            // attention: risque de récursivité infinie en cas d'absence d'objet à observer.
+            find_target_item();
+        }
+    }
+
+
+    /// <summary>
+    /// Cette fonction permet de déterminer la difficulté d'interaction avec un objet, en fonction du mode de jeu choisi, de la distance entre le joueur et l'objet et de la taille de l'objet.
+    /// </summary>
+    /// <param name="gamemode"> Un entier qui peut prendre les valeurs 1, 4 ou 7 selon le mode de jeu lancé </param>
+    /// <param name="target"> L'objet dont on va déterminer la difficulté d'interaction. </param>
+    /// <returns> Retourne le numéro de difficulté attribué à un seul GameObject, qui dépend de sa taille et de sa position par rapport au joueur. </returns>
+    private int determine_difficulty(int gamemode, GameObject target)
+    {
+        // On commence avec la difficulté de base, qui dépend du mode de jeu choisi. 1 pour regarder, 4 pour pointer, 7 pour attrapper.
+        int difficulty = gamemode;
+
+        // on ajoute ensuite des points de difficulté en fonction de la distance entre le joueur et l'objet, et de la taille de l'objet. Plus l'objet est loin ou petit, plus il est difficile à interagir avec.
+        if ( Vector3.Distance(player.transform.position, target.transform.position ) > distance_difficulty_cap && gamemode != 7) difficulty += 1;
+
+        if (target.transform.localScale.magnitude < size_difficulty_cap) {
+            difficulty += 1; 
+        }
+
+        // Comme un objet à attrapper ne peut pas être loin, on prévoit la possibilité qu'il soit très petit et donc difficile à récupérer.
+        if (gamemode == 7)
+        {
+            if (target.transform.localScale.magnitude < size_difficulty_cap / 2) {
+                difficulty += 1;
+            }
+        }
+
+        return difficulty;
     }
 }
