@@ -15,6 +15,9 @@ public class choose_target_items : MonoBehaviour
     [Tooltip("Le numéro de difficulté visé. 1-3: regarder. 4-6: pointer. 7-9: prendre")] 
     [SerializeField] private int targetDifficulty;
 
+    // on stocke les objets avec lesquels le joueur a déjà interagi, pour éviter de les faire réapparaître.
+    private List<GameObject> past_interacted = new List<GameObject>();
+
 
     // les valeurs suivantes sont sujettes à changement pour équilibrage.
     // Elles permettentent de convertir les distances en numéro de difficulté.
@@ -45,9 +48,13 @@ public class choose_target_items : MonoBehaviour
         foreach (GameObject item in interactableItems)
         {
             // Si la difficulté d'interaction avec cet objet correspond à la difficulté visée, on l'ajoute à la liste des objets ciblables.
-            if (determine_difficulty(targetDifficulty, item) == targetDifficulty)
+            if (determine_difficulty(targetDifficulty, item) == targetDifficulty && !past_interacted.Contains(item))
             {
                 targetableItems.Add(item);
+                past_interacted.Add(item); // on ajoute cet objet à la liste des objets déjà utilisés, pour éviter de le faire réapparaître plus tard.
+
+                // Si la liste past_interacted devient longue, on supprime le début de la liste pour éviter de ne plus trouver d'objets avec lesquels interagir.
+                if (past_interacted.Count > 3) past_interacted.RemoveAt(0);
             }
         }
 
@@ -56,6 +63,7 @@ public class choose_target_items : MonoBehaviour
         {
             int randomIndex = Random.Range(0, targetableItems.Count);
             targetItem = targetableItems[randomIndex];
+            return;
         }
          else
         {
@@ -102,3 +110,7 @@ public class choose_target_items : MonoBehaviour
         return difficulty;
     }
 }
+
+
+// TODO: Lier le set_target_difficulty avec un manager qui stocke la difficulté choisie par le.a soignant.e dans l'écran précédent, pour que le script puisse trouver des objets adaptés à la difficulté choisie.
+// TODO: Dans les autres codes, trouver où appeler la fonction find_target_item pour que le jeu puisse trouver un objet cible au début de chaque round, et après chaque interaction réussie.
