@@ -622,7 +622,6 @@ MonoBehaviour:
   timeobjectiveinsec: 1.5
   HealthBar: {fileID: 2034077528}
   gameObjectName: {fileID: 1065831685}
-  poseobjectcheck: {fileID: 0}
 --- !u!224 &318783685 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 7715032865672537428, guid: 71574cae293b2ed40acccb47d81cbf62, type: 3}
@@ -1515,7 +1514,6 @@ MonoBehaviour:
   timeobjectiveinsec: 1.5
   HealthBar: {fileID: 1593145672}
   gameObjectName: {fileID: 2137025770}
-  poseobjectcheck: {fileID: 0}
 --- !u!114 &825183376
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1729,7 +1727,6 @@ MonoBehaviour:
   timeobjectiveinsec: 1.5
   HealthBar: {fileID: 1115926751}
   gameObjectName: {fileID: 1392661910}
-  poseobjectcheck: {fileID: 0}
 --- !u!114 &956455313
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3349,7 +3346,6 @@ MonoBehaviour:
   timeobjectiveinsec: 1.5
   HealthBar: {fileID: 1624717476}
   gameObjectName: {fileID: 2137025770}
-  poseobjectcheck: {fileID: 0}
 --- !u!114 &1422196831
 MonoBehaviour:
   m_ObjectHideFlags: 0
